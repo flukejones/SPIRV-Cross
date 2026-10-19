@@ -17658,6 +17658,11 @@ bool CompilerMSL::variable_decl_is_remapped_storage(const SPIRVariable &variable
 	}
 	else if (storage == StorageClassStorageBuffer)
 	{
+		// Vertex output blocks remain thread-local until lowered on return from main.
+		if (get_execution_model() == ExecutionModelVertex && variable.storage == StorageClassOutput &&
+		    has_decoration(get<SPIRType>(variable.basetype).self, DecorationBlock))
+			return false;
+
 		// These builtins are passed directly; we don't want to use remapping
 		// for them.
 		auto builtin = (BuiltIn)get_decoration(variable.self, DecorationBuiltIn);
